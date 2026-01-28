@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import ProductCard from '@/components/ProductCard'
 
 export const metadata = {
@@ -7,6 +7,10 @@ export const metadata = {
 }
 
 export default async function RoupasPage() {
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return <p className="max-w-7xl mx-auto py-12 px-4">Catálogo indisponível no modo demo.</p>
+  }
   const category = await prisma.category.findUnique({ where: { slug: 'roupas' } })
   if (!category) return <p>Categoria não encontrada</p>
   const products = await prisma.product.findMany({

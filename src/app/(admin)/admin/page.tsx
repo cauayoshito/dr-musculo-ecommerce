@@ -1,10 +1,14 @@
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 
 export const metadata = {
   title: 'Painel Admin | Dr. Músculo',
 }
 
 export default async function AdminDashboard() {
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return <p className="text-gray-600">Dados indisponíveis no modo demo.</p>
+  }
   const [productCount, orderCount, paidSales, allSales, stores, lowStock] = await Promise.all([
     prisma.product.count(),
     prisma.order.count(),

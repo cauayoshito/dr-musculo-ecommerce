@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import { jsonError, jsonOk } from '@/lib/api'
 
 export async function GET(request: Request) {
@@ -8,6 +8,10 @@ export async function GET(request: Request) {
   const role = (session?.user as { role?: string } | undefined)?.role
   if (!session || role !== 'ADMIN') {
     return jsonError('Não autorizado', 401)
+  }
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return jsonOk({ orders: [] })
   }
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status') ?? undefined

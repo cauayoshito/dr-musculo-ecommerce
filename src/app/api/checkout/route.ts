@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import { createPreference } from '@/lib/mercadopago'
 import { hash } from 'bcryptjs'
 import crypto from 'crypto'
@@ -60,8 +60,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
     }
     const { items, customer } = parsed
+    const prisma = await getPrisma()
     // Calcula total
     const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    if (!prisma) {
+      return NextResponse.json({
+        init_point: null,
+        message: 'Pedido registrado no modo demo. Pagamento em breve.',
+      })
+    }
     const [onlineStore, existingUser] = await Promise.all([
       prisma.store.findFirst({ where: { isOnline: true } }),
       prisma.user.findUnique({ where: { email: customer.email } }),

@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 
 export const metadata = {
   title: 'Estoque da Loja | Dr. Músculo',
@@ -9,6 +9,10 @@ export const metadata = {
 export default async function StoreInventoryPage() {
   const session = await getServerSession(authOptions)
   const storeId = (session?.user as { storeId?: string | null } | undefined)?.storeId ?? null
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return <p className="text-gray-600">Estoque indisponível no modo demo.</p>
+  }
   if (!storeId) {
     return <p className="text-gray-600">Sem loja vinculada.</p>
   }

@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import { jsonError, jsonOk } from '@/lib/api'
 
 export async function GET() {
@@ -12,6 +12,10 @@ export async function GET() {
   }
   if (!storeId) {
     return jsonError('Loja não vinculada', 400)
+  }
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return jsonOk({ totalSales: 0, totalOrders: 0, ticketAverage: 0 })
   }
   const [paidSales, allSales] = await Promise.all([
     prisma.order.aggregate({ where: { storeId, paymentStatus: 'PAID' }, _sum: { total: true }, _count: { id: true } }),

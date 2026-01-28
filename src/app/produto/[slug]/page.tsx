@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import ProductGallery from '@/components/ProductGallery'
 import ProductDetail from '@/components/ProductDetail'
 import { notFound } from 'next/navigation'
@@ -8,6 +8,10 @@ interface Props {
 }
 
 export default async function ProductPage({ params }: Props) {
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return notFound()
+  }
   const product = await prisma.product.findUnique({
     where: { slug: params.slug },
     include: {

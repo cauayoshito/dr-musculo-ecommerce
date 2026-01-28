@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import { jsonError, jsonOk } from '@/lib/api'
 
 type StorePayload = {
@@ -32,6 +32,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   if (!session || role !== 'ADMIN') {
     return jsonError('Não autorizado', 401)
   }
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return jsonError('Banco indisponível no modo demo', 503)
+  }
   const body = await request.json()
   const parsed = parseStorePayload(body)
   if (!parsed) {
@@ -46,6 +50,10 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
   const role = (session?.user as { role?: string } | undefined)?.role
   if (!session || role !== 'ADMIN') {
     return jsonError('Não autorizado', 401)
+  }
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return jsonError('Banco indisponível no modo demo', 503)
   }
   await prisma.store.delete({ where: { id: params.id } })
   return jsonOk({ ok: true })

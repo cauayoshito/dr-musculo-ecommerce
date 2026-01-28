@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import StoreForm from '@/components/StoreForm'
 import { notFound } from 'next/navigation'
 
@@ -7,6 +7,10 @@ export const metadata = {
 }
 
 export default async function EditStorePage({ params }: { params: { id: string } }) {
+  const prisma = await getPrisma()
+  if (!prisma) {
+    notFound()
+  }
   const store = await prisma.store.findUnique({ where: { id: params.id } })
   if (!store) {
     notFound()

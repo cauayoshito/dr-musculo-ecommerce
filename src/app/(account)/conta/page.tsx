@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import Link from 'next/link'
 
 export const metadata = {
@@ -10,11 +10,14 @@ export const metadata = {
 export default async function AccountHomePage() {
   const session = await getServerSession(authOptions)
   const userId = (session?.user as { id?: string } | undefined)?.id
-  const orders = await prisma.order.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
-    take: 5,
-  })
+  const prisma = await getPrisma()
+  const orders = prisma
+    ? await prisma.order.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      })
+    : []
   return (
     <div>
       <h1 className="text-3xl font-bold mb-4">Minha conta</h1>

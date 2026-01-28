@@ -1,22 +1,25 @@
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Image from 'next/image'
 import ProductCard from '@/components/ProductCard'
 
 export default async function HomePage() {
+  const prisma = await getPrisma()
   // Busca produtos destacados
-  const [bestSellers, newArrivals] = await Promise.all([
-    prisma.product.findMany({
-      where: { bestSeller: true },
-      include: { images: true },
-      take: 4,
-    }),
-    prisma.product.findMany({
-      where: { newArrival: true },
-      include: { images: true },
-      take: 4,
-    }),
-  ])
+  const [bestSellers, newArrivals] = prisma
+    ? await Promise.all([
+        prisma.product.findMany({
+          where: { bestSeller: true },
+          include: { images: true },
+          take: 4,
+        }),
+        prisma.product.findMany({
+          where: { newArrival: true },
+          include: { images: true },
+          take: 4,
+        }),
+      ])
+    : [[], []]
   return (
     <div>
       {/* Hero */}

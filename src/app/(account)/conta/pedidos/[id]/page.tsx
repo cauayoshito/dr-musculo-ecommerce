@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 
 export const metadata = {
@@ -10,6 +10,10 @@ export const metadata = {
 export default async function AccountOrderDetailPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions)
   const userId = (session?.user as { id?: string } | undefined)?.id
+  const prisma = await getPrisma()
+  if (!prisma) {
+    notFound()
+  }
   const order = await prisma.order.findFirst({
     where: { id: params.id, userId },
     include: { items: { include: { product: true, variant: true } }, store: true },

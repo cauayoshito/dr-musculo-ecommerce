@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import { jsonError, jsonOk } from '@/lib/api'
 
 type InventoryPayload = {
@@ -27,6 +27,10 @@ export async function POST(request: Request) {
   const role = (session?.user as { role?: string } | undefined)?.role
   if (!session || role !== 'ADMIN') {
     return jsonError('Não autorizado', 401)
+  }
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return jsonError('Banco indisponível no modo demo', 503)
   }
   const body = await request.json()
   const parsed = parseInventoryPayload(body)

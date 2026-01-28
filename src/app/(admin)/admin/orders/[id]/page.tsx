@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 
 interface Props {
@@ -6,6 +6,10 @@ interface Props {
 }
 
 export default async function OrderDetailPage({ params }: Props) {
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return notFound()
+  }
   const order = await prisma.order.findUnique({
     where: { id: params.id },
     include: {

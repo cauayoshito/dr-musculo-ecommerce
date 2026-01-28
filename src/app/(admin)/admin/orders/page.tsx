@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import Link from 'next/link'
 
 export const metadata = {
@@ -10,6 +10,10 @@ export default async function AdminOrdersPage({
 }: {
   searchParams: { status?: string; storeId?: string; from?: string; to?: string }
 }) {
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return <p className="text-gray-600">Pedidos indisponíveis no modo demo.</p>
+  }
   const stores = await prisma.store.findMany({ orderBy: { name: 'asc' } })
   const filters: Record<string, any> = {}
   if (searchParams.status) {

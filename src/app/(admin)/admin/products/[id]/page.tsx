@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import InventoryEditor from '@/components/InventoryEditor'
 import { notFound } from 'next/navigation'
 
@@ -7,6 +7,10 @@ export const metadata = {
 }
 
 export default async function AdminProductDetailPage({ params }: { params: { id: string } }) {
+  const prisma = await getPrisma()
+  if (!prisma) {
+    notFound()
+  }
   const product = await prisma.product.findUnique({
     where: { id: params.id },
     include: { variants: true },

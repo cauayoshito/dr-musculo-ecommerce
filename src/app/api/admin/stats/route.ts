@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import { jsonError, jsonOk } from '@/lib/api'
 
 export async function GET() {
@@ -8,6 +8,10 @@ export async function GET() {
   const role = (session?.user as { role?: string } | undefined)?.role
   if (!session || role !== 'ADMIN') {
     return jsonError('Não autorizado', 401)
+  }
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return jsonOk({ totalSales: 0, totalOrders: 0, ticketAverage: 0, ordersLast7: 0 })
   }
   const [paidSales, allSales, ordersLast7] = await Promise.all([
     prisma.order.aggregate({ where: { paymentStatus: 'PAID' }, _sum: { total: true }, _count: { id: true } }),
