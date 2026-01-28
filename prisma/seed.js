@@ -4,20 +4,134 @@ const { hashSync } = require("bcryptjs");
 const prisma = new PrismaClient();
 
 async function main() {
-  // 1) Admin
+  // 1) Lojas
+  const [storeSalvador, storeSajA, storeSajB, storeOnline] = await Promise.all([
+    prisma.store.upsert({
+      where: { slug: "salvador-ba" },
+      update: {
+        name: "Dr. Músculo Salvador",
+        city: "Salvador",
+        state: "BA",
+        isOnline: false,
+      },
+      create: {
+        name: "Dr. Músculo Salvador",
+        slug: "salvador-ba",
+        city: "Salvador",
+        state: "BA",
+        isOnline: false,
+      },
+    }),
+    prisma.store.upsert({
+      where: { slug: "santo-antonio-a" },
+      update: {
+        name: "Dr. Músculo SAJ (Loja A)",
+        city: "Santo Antônio de Jesus",
+        state: "BA",
+        isOnline: false,
+      },
+      create: {
+        name: "Dr. Músculo SAJ (Loja A)",
+        slug: "santo-antonio-a",
+        city: "Santo Antônio de Jesus",
+        state: "BA",
+        isOnline: false,
+      },
+    }),
+    prisma.store.upsert({
+      where: { slug: "santo-antonio-b" },
+      update: {
+        name: "Dr. Músculo SAJ (Loja B)",
+        city: "Santo Antônio de Jesus",
+        state: "BA",
+        isOnline: false,
+      },
+      create: {
+        name: "Dr. Músculo SAJ (Loja B)",
+        slug: "santo-antonio-b",
+        city: "Santo Antônio de Jesus",
+        state: "BA",
+        isOnline: false,
+      },
+    }),
+    prisma.store.upsert({
+      where: { slug: "online" },
+      update: {
+        name: "Dr. Músculo Online",
+        city: "Online",
+        state: "BR",
+        isOnline: true,
+      },
+      create: {
+        name: "Dr. Músculo Online",
+        slug: "online",
+        city: "Online",
+        state: "BR",
+        isOnline: true,
+      },
+    }),
+  ]);
+
+  // 2) Usuários
   const adminEmail = "admin@drmusculo.com";
   await prisma.user.upsert({
     where: { email: adminEmail },
     update: {},
     create: {
       email: adminEmail,
-      name: "Administrador",
+      name: "Administrador Geral",
       hashedPassword: hashSync("admin123", 10),
       role: "ADMIN",
     },
   });
 
-  // 2) Categorias
+  await Promise.all([
+    prisma.user.upsert({
+      where: { email: "salvador@drmusculo.com" },
+      update: { storeId: storeSalvador.id, role: "STORE_OWNER" },
+      create: {
+        email: "salvador@drmusculo.com",
+        name: "Gestor Salvador",
+        hashedPassword: hashSync("loja123", 10),
+        role: "STORE_OWNER",
+        storeId: storeSalvador.id,
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: "saj-a@drmusculo.com" },
+      update: { storeId: storeSajA.id, role: "STORE_OWNER" },
+      create: {
+        email: "saj-a@drmusculo.com",
+        name: "Gestor SAJ A",
+        hashedPassword: hashSync("loja123", 10),
+        role: "STORE_OWNER",
+        storeId: storeSajA.id,
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: "saj-b@drmusculo.com" },
+      update: { storeId: storeSajB.id, role: "STORE_OWNER" },
+      create: {
+        email: "saj-b@drmusculo.com",
+        name: "Gestor SAJ B",
+        hashedPassword: hashSync("loja123", 10),
+        role: "STORE_OWNER",
+        storeId: storeSajB.id,
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: "cliente@drmusculo.com" },
+      update: { role: "CUSTOMER" },
+      create: {
+        email: "cliente@drmusculo.com",
+        name: "Cliente Demo",
+        hashedPassword: hashSync("cliente123", 10),
+        role: "CUSTOMER",
+      },
+    }),
+  ]);
+
+  // 3) Categorias
   const [suplementos, acessorios, roupas] = await Promise.all([
     prisma.category.upsert({
       where: { slug: "suplementos" },
@@ -36,9 +150,10 @@ async function main() {
     }),
   ]);
 
-  // 3) Limpeza (ordem segura por FK)
+  // 4) Limpeza (ordem segura por FK)
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
+  await prisma.storeInventory.deleteMany();
   await prisma.image.deleteMany();
   await prisma.productVariant.deleteMany();
   await prisma.product.deleteMany();
@@ -447,6 +562,26 @@ async function main() {
       ],
     }),
   ]);
+
+  const variants = await prisma.productVariant.findMany();
+  const stores = [storeSalvador, storeSajA, storeSajB, storeOnline];
+  const inventoryRows = [];
+  for (const variant of variants) {
+    for (const store of stores) {
+      const baseStock = store.isOnline ? variant.stock : Math.max(0, Math.floor(variant.stock / 2));
+      inventoryRows.push({
+        storeId: store.id,
+        variantId: variant.id,
+        stock: baseStock,
+      });
+    }
+  }
+  if (inventoryRows.length > 0) {
+    await prisma.storeInventory.createMany({
+      data: inventoryRows,
+      skipDuplicates: true,
+    });
+  }
 
   console.log("✅ Seed executado com sucesso!");
 }

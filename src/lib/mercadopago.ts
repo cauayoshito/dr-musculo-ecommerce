@@ -20,6 +20,7 @@ export async function createPreference({
   const response = await preference.create({
     body: {
       items: items.map((item) => ({
+        id: item.title,
         title: item.title,
         quantity: item.quantity,
         unit_price: item.unit_price,

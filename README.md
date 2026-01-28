@@ -94,6 +94,23 @@ dr-musculo/
 
    O projeto está pronto para ser implantado na **Vercel**. A Vercel detecta automaticamente aplicações Next.js. Lembre‑se de configurar as variáveis de ambiente no dashboard da Vercel e apontar para o banco de dados (Supabase/PostgreSQL). Para webhooks do Mercado Pago, configure a URL pública gerada pela Vercel (por exemplo, `https://seu-dominio.vercel.app/api/checkout`) no painel do Mercado Pago.
 
+## Credenciais de acesso (seed)
+
+Após executar `npm run seed`, use as credenciais abaixo:
+
+**Administrador geral (ADMIN)**
+- Email: `admin@drmusculo.com`
+- Senha: `admin123`
+
+**Gestores de loja (STORE_OWNER)**
+- Salvador: `salvador@drmusculo.com` / `loja123`
+- SAJ (Loja A): `saj-a@drmusculo.com` / `loja123`
+- SAJ (Loja B): `saj-b@drmusculo.com` / `loja123`
+
+**Cliente demo (CUSTOMER)**
+- Email: `cliente@drmusculo.com`
+- Senha: `cliente123`
+
 ## Próximos passos
 
 * **Cálculo de frete real** – integrar com API de fretes (Correios, Melhor Envio etc.).

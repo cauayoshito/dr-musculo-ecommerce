@@ -49,7 +49,17 @@ export async function POST(request: Request) {
       },
     })
     if (!pref) throw new Error('Não foi possível criar a preferência')
-    return NextResponse.json({ init_point: pref.body.init_point ?? pref.body.sandbox_init_point })
+    const prefData = pref as {
+      body?: { init_point?: string | null; sandbox_init_point?: string | null }
+      init_point?: string | null
+      sandbox_init_point?: string | null
+    }
+    const initPoint =
+      prefData.body?.init_point ??
+      prefData.body?.sandbox_init_point ??
+      prefData.init_point ??
+      prefData.sandbox_init_point
+    return NextResponse.json({ init_point: initPoint })
   } catch (error: any) {
     console.error('Erro no checkout', error)
     return NextResponse.json({ error: 'Erro interno no servidor' }, { status: 500 })
