@@ -2,35 +2,64 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createPreference } from '@/lib/mercadopago'
 import { hash } from 'bcryptjs'
-import { z } from 'zod'
 import crypto from 'crypto'
 
-const checkoutSchema = z.object({
-  items: z.array(
-    z.object({
-      productId: z.string().min(1),
-      variantId: z.string().optional(),
-      name: z.string().min(1),
-      price: z.number().nonnegative(),
-      quantity: z.number().int().positive(),
-    }),
-  ),
-  customer: z.object({
-    name: z.string().min(1),
-    email: z.string().email(),
-    phone: z.string().min(6),
-    address: z.string().min(4),
-  }),
-})
+type CheckoutPayload = {
+  items: Array<{
+    productId: string
+    variantId?: string
+    name: string
+    price: number
+    quantity: number
+  }>
+  customer: {
+    name: string
+    email: string
+    phone: string
+    address: string
+  }
+}
+
+const isNonEmptyString = (value: unknown) => typeof value === 'string' && value.trim().length > 0
+const isPositiveInt = (value: unknown) => typeof value === 'number' && Number.isInteger(value) && value > 0
+const isNonNegative = (value: unknown) => typeof value === 'number' && value >= 0
+
+function parseCheckoutPayload(body: unknown): CheckoutPayload | null {
+  if (!body || typeof body !== 'object') return null
+  const payload = body as CheckoutPayload
+  if (!Array.isArray(payload.items) || payload.items.length === 0) return null
+  if (!payload.customer) return null
+  const customer = payload.customer
+  if (
+    !isNonEmptyString(customer.name) ||
+    !isNonEmptyString(customer.email) ||
+    !isNonEmptyString(customer.phone) ||
+    !isNonEmptyString(customer.address)
+  ) {
+    return null
+  }
+  for (const item of payload.items) {
+    if (
+      !isNonEmptyString(item.productId) ||
+      !isNonEmptyString(item.name) ||
+      (item.variantId && !isNonEmptyString(item.variantId)) ||
+      !isNonNegative(item.price) ||
+      !isPositiveInt(item.quantity)
+    ) {
+      return null
+    }
+  }
+  return payload
+}
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const parsed = checkoutSchema.safeParse(body)
-    if (!parsed.success) {
+    const parsed = parseCheckoutPayload(body)
+    if (!parsed) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
     }
-    const { items, customer } = parsed.data
+    const { items, customer } = parsed
     // Calcula total
     const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
     const [onlineStore, existingUser] = await Promise.all([

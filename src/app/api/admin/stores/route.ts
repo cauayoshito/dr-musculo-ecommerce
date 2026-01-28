@@ -2,15 +2,29 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { jsonError, jsonOk } from '@/lib/api'
-import { z } from 'zod'
 
-const storeSchema = z.object({
-  name: z.string().min(2),
-  slug: z.string().min(2),
-  city: z.string().min(2),
-  state: z.string().min(2),
-  isOnline: z.boolean().optional().default(false),
-})
+type StorePayload = {
+  name: string
+  slug: string
+  city: string
+  state: string
+  isOnline?: boolean
+}
+
+const isNonEmptyString = (value: unknown) => typeof value === 'string' && value.trim().length >= 2
+const parseStorePayload = (body: unknown): StorePayload | null => {
+  if (!body || typeof body !== 'object') return null
+  const payload = body as StorePayload
+  if (!isNonEmptyString(payload.name) || !isNonEmptyString(payload.slug)) return null
+  if (!isNonEmptyString(payload.city) || !isNonEmptyString(payload.state)) return null
+  return {
+    name: payload.name.trim(),
+    slug: payload.slug.trim(),
+    city: payload.city.trim(),
+    state: payload.state.trim(),
+    isOnline: Boolean(payload.isOnline),
+  }
+}
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -29,10 +43,10 @@ export async function POST(request: Request) {
     return jsonError('Não autorizado', 401)
   }
   const body = await request.json()
-  const parsed = storeSchema.safeParse(body)
-  if (!parsed.success) {
+  const parsed = parseStorePayload(body)
+  if (!parsed) {
     return jsonError('Dados inválidos', 400)
   }
-  const store = await prisma.store.create({ data: parsed.data })
+  const store = await prisma.store.create({ data: parsed })
   return jsonOk({ store }, 201)
 }
