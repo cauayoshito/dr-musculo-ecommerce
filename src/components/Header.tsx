@@ -4,11 +4,16 @@ import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import { useState } from 'react'
 import { Menu, ShoppingCart, Search, User } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 
 export default function Header() {
   const { state } = useCart()
   const cartCount = state.items.reduce((acc, item) => acc + item.quantity, 0)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { data: session } = useSession()
+  const role = (session?.user as { role?: string } | undefined)?.role
+  const dashboardLink =
+    role === 'ADMIN' ? '/admin' : role === 'STORE_OWNER' ? '/store' : role === 'CUSTOMER' ? '/conta' : '/login'
 
   return (
     <header className="bg-white shadow sticky top-0 z-20">
@@ -27,6 +32,9 @@ export default function Header() {
             <Link href="/acessorios" className="hover:text-primary">Acessórios</Link>
             <Link href="/roupas" className="hover:text-primary">Roupas</Link>
             <Link href="/#ofertas" className="hover:text-primary">Ofertas</Link>
+            <Link href={dashboardLink} className="hover:text-primary">
+              {role === 'CUSTOMER' ? 'Minha conta' : 'Dashboard'}
+            </Link>
           </nav>
           {/* Ações */}
           <div className="flex items-center space-x-4">
@@ -39,8 +47,8 @@ export default function Header() {
               />
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             </div>
-            {/* Conta (apenas admin) */}
-            <Link href="/admin" className="hidden md:block">
+            {/* Conta */}
+            <Link href={dashboardLink} className="hidden md:block">
               <User className="w-5 h-5" />
             </Link>
             {/* Carrinho */}
@@ -67,7 +75,9 @@ export default function Header() {
           <Link href="/acessorios" className="block" onClick={() => setMobileOpen(false)}>Acessórios</Link>
           <Link href="/roupas" className="block" onClick={() => setMobileOpen(false)}>Roupas</Link>
           <Link href="/#ofertas" className="block" onClick={() => setMobileOpen(false)}>Ofertas</Link>
-          <Link href="/admin" className="block" onClick={() => setMobileOpen(false)}>Admin</Link>
+          <Link href={dashboardLink} className="block" onClick={() => setMobileOpen(false)}>
+            {role === 'CUSTOMER' ? 'Minha conta' : 'Dashboard'}
+          </Link>
         </nav>
       )}
     </header>

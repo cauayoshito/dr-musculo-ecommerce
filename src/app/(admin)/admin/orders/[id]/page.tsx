@@ -10,6 +10,7 @@ export default async function OrderDetailPage({ params }: Props) {
     where: { id: params.id },
     include: {
       items: { include: { product: true, variant: true } },
+      store: true,
     },
   })
   if (!order) return notFound()
@@ -24,6 +25,8 @@ export default async function OrderDetailPage({ params }: Props) {
           <p><strong>Telefone:</strong> {order.customerPhone}</p>
           <p><strong>Endereço:</strong> {order.shippingAddress}</p>
           <p><strong>Status:</strong> {order.status}</p>
+          <p><strong>Pagamento:</strong> {order.paymentStatus}</p>
+          <p><strong>Loja:</strong> {order.store?.name ?? 'Online'}</p>
         </div>
         <div>
           <h2 className="font-semibold mb-2">Itens</h2>
