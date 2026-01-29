@@ -1,8 +1,19 @@
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '@prisma/client'
 
-// Evita recriar o PrismaClient em desenvolvimento (hot reload)
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined }
+type PrismaGlobal = { prisma?: PrismaClient | null }
+const globalForPrisma = globalThis as PrismaGlobal
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient()
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+export async function getPrisma(): Promise<PrismaClient | null> {
+  if (!process.env.DATABASE_URL) {
+    return null
+  }
+  if (globalForPrisma.prisma) {
+    return globalForPrisma.prisma
+  }
+  const { PrismaClient: PrismaClientRuntime } = await import('@prisma/client')
+  const client = new PrismaClientRuntime()
+  if (process.env.NODE_ENV !== 'production') {
+    globalForPrisma.prisma = client
+  }
+  return client
+}

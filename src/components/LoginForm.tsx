@@ -1,16 +1,26 @@
 "use client"
 
-import { signIn } from 'next-auth/react'
 import { useState } from 'react'
+import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
-export default function AdminLoginPage() {
+type RoleRedirects = Record<string, string>
+
+export default function LoginForm({
+  title,
+  redirects,
+}: {
+  title: string
+  redirects: RoleRedirects
+}) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const router = useRouter()
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setError('')
     const res = await signIn('credentials', {
       redirect: false,
       email,
@@ -18,14 +28,18 @@ export default function AdminLoginPage() {
     })
     if (res?.error) {
       setError('Credenciais inválidas')
-    } else {
-      router.push('/admin')
+      return
     }
+    const session = await getSession()
+    const role = (session?.user as { role?: string } | undefined)?.role
+    const destination = (role && redirects[role]) || redirects.default || '/'
+    router.push(destination)
   }
+
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-4">
       <div className="max-w-md w-full border rounded-lg p-6 bg-white shadow">
-        <h1 className="text-2xl font-bold mb-4 text-center">Login Administrador</h1>
+        <h1 className="text-2xl font-bold mb-4 text-center">{title}</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"

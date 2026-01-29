@@ -1,8 +1,9 @@
 import { MercadoPagoConfig, Preference } from 'mercadopago'
-import { prisma } from './prisma'
 
 // Configuração do cliente Mercado Pago
-const mpClient = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN! })
+const mpClient = process.env.MP_ACCESS_TOKEN
+  ? new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN })
+  : null
 
 // Cria uma preferência de pagamento a partir do resumo do carrinho
 export async function createPreference({
@@ -16,10 +17,12 @@ export async function createPreference({
   payer: { name: string; email: string }
   redirectUrls: { success: string; failure: string; pending: string }
 }) {
+  if (!mpClient) return null
   const preference = new Preference(mpClient)
   const response = await preference.create({
     body: {
       items: items.map((item) => ({
+        id: item.title,
         title: item.title,
         quantity: item.quantity,
         unit_price: item.unit_price,

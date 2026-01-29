@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getPrisma } from '@/lib/prisma'
 import Link from 'next/link'
 
 export const metadata = {
@@ -6,6 +6,10 @@ export const metadata = {
 }
 
 export default async function AdminProductsPage() {
+  const prisma = await getPrisma()
+  if (!prisma) {
+    return <p className="text-gray-600">Produtos indisponíveis no modo demo.</p>
+  }
   const products = await prisma.product.findMany({ include: { category: true } })
   return (
     <div>

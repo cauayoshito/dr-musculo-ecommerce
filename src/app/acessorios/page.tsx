@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getDemoProductsByCategory } from '@/lib/demo/catalog'
 import ProductCard from '@/components/ProductCard'
 
 export const metadata = {
@@ -7,13 +7,7 @@ export const metadata = {
 }
 
 export default async function AcessoriosPage() {
-  const category = await prisma.category.findUnique({ where: { slug: 'acessorios' } })
-  if (!category) return <p>Categoria não encontrada</p>
-  const products = await prisma.product.findMany({
-    where: { categoryId: category.id },
-    include: { images: true },
-    orderBy: { createdAt: 'desc' },
-  })
+  const products = getDemoProductsByCategory('acessorios')
   return (
     <div className="max-w-7xl mx-auto py-12 px-4">
       <h1 className="text-3xl font-bold mb-6">Acessórios</h1>
@@ -28,8 +22,8 @@ export default async function AcessoriosPage() {
             id={product.id}
             slug={product.slug}
             name={product.name}
-            price={Number(product.price)}
-            image={product.images[0]?.url ?? ''}
+            price={product.price}
+            image={product.images[0] ?? ''}
           />
         ))}
       </div>

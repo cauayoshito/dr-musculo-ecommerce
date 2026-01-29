@@ -64,13 +64,15 @@ dr-musculo/
    NEXTAUTH_SECRET=uma_string_aleatoria_grande
    NEXTAUTH_URL=https://seu-dominio.vercel.app
 
+   # Mercado Pago (opcional enquanto não ativado)
+   MP_ACCESS_TOKEN=seu_token_mercadopago
+
    # Cloudinary (ou Supabase Storage)
    CLOUDINARY_CLOUD_NAME=nome_da_cloud
    CLOUDINARY_API_KEY=sua_api_key
    CLOUDINARY_API_SECRET=sua_api_secret
 
    # Mercado Pago
-   MP_ACCESS_TOKEN=token_privado_do_mercadopago
    MP_PUBLIC_KEY=chave_publica_do_mercadopago
    ```
 
@@ -87,12 +89,54 @@ dr-musculo/
 4. **Execute em ambiente de desenvolvimento**
 
    ```bash
+   npm run demo:catalog
    npm run dev
    ```
+
+## Rotas de login
+
+- Admin: `/admin/login`
+- Loja: `/store/login`
+- Cliente: `/conta/login`
+
+## Modo demo (frontend-only)
+
+Este projeto pode rodar sem `DATABASE_URL` para apresentação. O catálogo demo é gerado via:
+
+```bash
+npm run demo:catalog
+```
+
+O build usa apenas `next build` e não executa migrações automaticamente.
 
 5. **Deploy**
 
    O projeto está pronto para ser implantado na **Vercel**. A Vercel detecta automaticamente aplicações Next.js. Lembre‑se de configurar as variáveis de ambiente no dashboard da Vercel e apontar para o banco de dados (Supabase/PostgreSQL). Para webhooks do Mercado Pago, configure a URL pública gerada pela Vercel (por exemplo, `https://seu-dominio.vercel.app/api/checkout`) no painel do Mercado Pago.
+
+## Credenciais de acesso (seed)
+
+Após executar `npm run seed`, use as credenciais abaixo:
+
+**Administrador geral (ADMIN)**
+- Email: `admin@drmusculo.com`
+- Senha: `admin123`
+
+**Gestores de loja (STORE_OWNER)**
+- Salvador: `store1@drmusculo.com` / `admin123`
+- SAJ (Loja A): `store2@drmusculo.com` / `admin123`
+- SAJ (Loja B): `store3@drmusculo.com` / `admin123`
+
+**Cliente demo (CUSTOMER)**
+- Email: `cliente@drmusculo.com`
+- Senha: `cliente123`
+
+## Deploy com Prisma
+
+Em produção, use:
+
+```bash
+npx prisma migrate deploy
+```
 
 ## Próximos passos
 

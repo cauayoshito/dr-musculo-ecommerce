@@ -11,12 +11,14 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const handlePay = async () => {
     if (!name || !email || !phone || !address) {
       setError('Por favor, preencha todos os dados.')
       return
     }
     setError('')
+    setNotice('')
     setLoading(true)
     try {
       const response = await fetch('/api/checkout', {
@@ -38,8 +40,10 @@ export default function CheckoutPage() {
       if (data.init_point) {
         // Redireciona para o checkout do Mercado Pago
         window.location.href = data.init_point
+      } else if (data.message) {
+        setNotice(data.message)
       } else {
-        throw new Error('Resposta inválida do servidor')
+        setNotice('Pagamento em breve. Pedido registrado com sucesso.')
       }
     } catch (e: any) {
       setError(e.message)
@@ -111,6 +115,7 @@ export default function CheckoutPage() {
               />
             </div>
             {error && <p className="text-red-600 mt-2">{error}</p>}
+            {notice && <p className="text-green-600 mt-2">{notice}</p>}
             <button
               onClick={handlePay}
               disabled={loading}
