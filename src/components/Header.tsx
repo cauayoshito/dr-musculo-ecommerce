@@ -11,9 +11,7 @@ export default function Header() {
   const cartCount = state.items.reduce((acc, item) => acc + item.quantity, 0)
   const [mobileOpen, setMobileOpen] = useState(false)
   const { data: session } = useSession()
-  const role = (session?.user as { role?: string } | undefined)?.role
-  const dashboardLink =
-    role === 'ADMIN' ? '/admin' : role === 'STORE_OWNER' ? '/store' : role === 'CUSTOMER' ? '/conta' : '/login'
+  const accountLink = session?.user ? '/conta' : '/login'
 
   return (
     <header className="bg-white shadow sticky top-0 z-20">
@@ -31,10 +29,7 @@ export default function Header() {
             <Link href="/suplementos" className="hover:text-primary">Suplementos</Link>
             <Link href="/acessorios" className="hover:text-primary">Acessórios</Link>
             <Link href="/roupas" className="hover:text-primary">Roupas</Link>
-            <Link href="/#ofertas" className="hover:text-primary">Ofertas</Link>
-            <Link href={dashboardLink} className="hover:text-primary">
-              {role === 'CUSTOMER' ? 'Minha conta' : 'Dashboard'}
-            </Link>
+            <Link href="/ofertas" className="hover:text-primary">Ofertas</Link>
           </nav>
           {/* Ações */}
           <div className="flex items-center space-x-4">
@@ -48,7 +43,7 @@ export default function Header() {
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             </div>
             {/* Conta */}
-            <Link href={dashboardLink} className="hidden md:block">
+            <Link href={accountLink} className="hidden md:block">
               <User className="w-5 h-5" />
             </Link>
             {/* Carrinho */}
@@ -74,10 +69,8 @@ export default function Header() {
           <Link href="/suplementos" className="block" onClick={() => setMobileOpen(false)}>Suplementos</Link>
           <Link href="/acessorios" className="block" onClick={() => setMobileOpen(false)}>Acessórios</Link>
           <Link href="/roupas" className="block" onClick={() => setMobileOpen(false)}>Roupas</Link>
-          <Link href="/#ofertas" className="block" onClick={() => setMobileOpen(false)}>Ofertas</Link>
-          <Link href={dashboardLink} className="block" onClick={() => setMobileOpen(false)}>
-            {role === 'CUSTOMER' ? 'Minha conta' : 'Dashboard'}
-          </Link>
+          <Link href="/ofertas" className="block" onClick={() => setMobileOpen(false)}>Ofertas</Link>
+          <Link href={accountLink} className="block" onClick={() => setMobileOpen(false)}>Conta</Link>
         </nav>
       )}
     </header>

@@ -89,6 +89,7 @@ dr-musculo/
 4. **Execute em ambiente de desenvolvimento**
 
    ```bash
+   npm run demo:catalog
    npm run dev
    ```
 
@@ -97,6 +98,16 @@ dr-musculo/
 - Admin: `/admin/login`
 - Loja: `/store/login`
 - Cliente: `/conta/login`
+
+## Modo demo (frontend-only)
+
+Este projeto pode rodar sem `DATABASE_URL` para apresentação. O catálogo demo é gerado via:
+
+```bash
+npm run demo:catalog
+```
+
+O build usa apenas `next build` e não executa migrações automaticamente.
 
 5. **Deploy**
 

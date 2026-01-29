@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "vercel-build": "next build",
-    "seed": "node prisma/seed.js"
+    "seed": "node prisma/seed.js",
+    "demo:catalog": "python scripts/generate_demo_catalog.py"
   },
   "dependencies": {
     "@prisma/client": "^5.10.0",

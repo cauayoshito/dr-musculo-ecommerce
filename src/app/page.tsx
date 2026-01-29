@@ -1,25 +1,11 @@
-import { getPrisma } from '@/lib/prisma'
+import { demoLists, getDemoProductsBySlugs } from '@/lib/demo/catalog'
 import Link from 'next/link'
 import Image from 'next/image'
 import ProductCard from '@/components/ProductCard'
 
 export default async function HomePage() {
-  const prisma = await getPrisma()
-  // Busca produtos destacados
-  const [bestSellers, newArrivals] = prisma
-    ? await Promise.all([
-        prisma.product.findMany({
-          where: { bestSeller: true },
-          include: { images: true },
-          take: 4,
-        }),
-        prisma.product.findMany({
-          where: { newArrival: true },
-          include: { images: true },
-          take: 4,
-        }),
-      ])
-    : [[], []]
+  const bestSellers = getDemoProductsBySlugs(demoLists.maisVendidos).slice(0, 4)
+  const newArrivals = getDemoProductsBySlugs(demoLists.novidades).slice(0, 4)
   return (
     <div>
       {/* Hero */}
@@ -97,8 +83,8 @@ export default async function HomePage() {
                 id={product.id}
                 slug={product.slug}
                 name={product.name}
-                price={Number(product.price)}
-                image={product.images[0]?.url ?? ''}
+                price={product.price}
+                image={product.images[0] ?? ''}
               />
             ))}
           </div>
@@ -115,8 +101,8 @@ export default async function HomePage() {
                 id={product.id}
                 slug={product.slug}
                 name={product.name}
-                price={Number(product.price)}
-                image={product.images[0]?.url ?? ''}
+                price={product.price}
+                image={product.images[0] ?? ''}
               />
             ))}
           </div>
