@@ -1,5 +1,22 @@
 import { getPrisma } from '@/lib/prisma'
 
+type Store = {
+  id: string
+  name: string
+  slug: string
+}
+
+type LowStockItem = {
+  id: string
+  stock: number
+  store: { name: string }
+  variant: {
+    name: string
+    option: string
+    product: { name: string }
+  }
+}
+
 export const metadata = {
   title: 'Painel Admin | Dr. Músculo',
 }
@@ -9,6 +26,12 @@ export default async function AdminDashboard() {
   if (!prisma) {
     return <p className="text-gray-600">Dados indisponíveis no modo demo.</p>
   }
+  const storesPromise = (prisma as any).store.findMany({ orderBy: { name: 'asc' } }) as Promise<Store[]>
+  const lowStockPromise = (prisma as any).storeInventory.findMany({
+    where: { stock: { lte: 5 } },
+    include: { store: true, variant: { include: { product: true } } },
+    take: 8,
+  }) as Promise<LowStockItem[]>
   const [productCount, orderCount, paidSales, allSales, stores, lowStock] = await Promise.all([
     prisma.product.count(),
     prisma.order.count(),
@@ -21,12 +44,8 @@ export default async function AdminDashboard() {
       _sum: { total: true },
       _count: { id: true },
     }),
-    (prisma as any).store.findMany({ orderBy: { name: 'asc' } }),
-    (prisma as any).storeInventory.findMany({
-      where: { stock: { lte: 5 } },
-      include: { store: true, variant: { include: { product: true } } },
-      take: 8,
-    }),
+    storesPromise,
+    lowStockPromise,
   ])
   const totalSalesValue = Number(paidSales._sum.total ?? 0) || Number(allSales._sum.total ?? 0)
   const totalSalesOrders = Number(paidSales._count.id ?? 0) || Number(allSales._count.id ?? 0)

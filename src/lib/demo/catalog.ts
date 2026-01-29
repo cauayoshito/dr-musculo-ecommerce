@@ -1,7 +1,7 @@
 import { demoCatalog, type DemoProduct } from './catalog.generated'
 
 const products = demoCatalog.products
-const productBySlug = new Map(products.map((product) => [product.slug, product]))
+const productBySlug = new Map<string, DemoProduct>(products.map((product) => [product.slug, product]))
 
 export const demoLists = {
   maisVendidos: demoCatalog.maisVendidos,

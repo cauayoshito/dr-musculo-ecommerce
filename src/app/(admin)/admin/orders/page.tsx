@@ -1,6 +1,12 @@
 import { getPrisma } from '@/lib/prisma'
 import Link from 'next/link'
 
+type Store = {
+  id: string
+  name: string
+  slug: string
+}
+
 export const metadata = {
   title: 'Gerenciar pedidos | Dr. Músculo',
 }
@@ -14,7 +20,7 @@ export default async function AdminOrdersPage({
   if (!prisma) {
     return <p className="text-gray-600">Pedidos indisponíveis no modo demo.</p>
   }
-  const stores = await (prisma as any).store.findMany({ orderBy: { name: 'asc' } })
+  const stores = await ((prisma as any).store.findMany({ orderBy: { name: 'asc' } }) as Promise<Store[]>)
   const filters: Record<string, any> = {}
   if (searchParams.status) {
     filters.status = searchParams.status

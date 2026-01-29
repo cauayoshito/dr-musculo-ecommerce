@@ -13,11 +13,11 @@ export type DemoProduct = {
   categorySlug: 'suplementos' | 'acessorios' | 'roupas'
   brand: string
   price: number
-  compareAt?: number
-  images: string[]
+  compareAt?: number | null
+  images: ReadonlyArray<string>
   description: string
-  tags: string[]
-  variants: DemoVariant[]
+  tags: ReadonlyArray<string>
+  variants: ReadonlyArray<DemoVariant>
 }
 
 export const demoCatalog = {

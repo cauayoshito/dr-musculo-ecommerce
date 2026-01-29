@@ -1,6 +1,14 @@
 import Link from 'next/link'
 import { getPrisma } from '@/lib/prisma'
 
+type Store = {
+  id: string
+  name: string
+  city: string | null
+  state: string | null
+  isOnline: boolean
+}
+
 export const metadata = {
   title: 'Lojas | Dr. Músculo',
 }
@@ -10,7 +18,7 @@ export default async function AdminStoresPage() {
   if (!prisma) {
     return <p className="text-gray-600">Lojas indisponíveis no modo demo.</p>
   }
-  const stores = await (prisma as any).store.findMany({ orderBy: { name: 'asc' } })
+  const stores = await ((prisma as any).store.findMany({ orderBy: { name: 'asc' } }) as Promise<Store[]>)
   return (
     <div>
       <div className="flex items-center justify-between mb-6">

@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 
 interface Props {
-  images: string[]
+  images: ReadonlyArray<string>
 }
 
 export default function ProductGallery({ images }: Props) {

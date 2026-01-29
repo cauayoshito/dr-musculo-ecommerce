@@ -16,7 +16,7 @@ const mulberry32 = (seed: number): SeededRandom => {
   }
 }
 
-const pickMany = <T,>(list: T[], count: number, rng: SeededRandom) => {
+const pickMany = <T,>(list: ReadonlyArray<T>, count: number, rng: SeededRandom) => {
   const pool = [...list]
   const result: T[] = []
   while (pool.length > 0 && result.length < count) {
